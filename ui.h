@@ -53,14 +53,14 @@ typedef struct
     //! is not used.  When in flash, this value is used to determine the
     //! parameter block with the most recent information.
     //
-    unsigned char ucSequenceNum;
+//    unsigned char ucSequenceNum;
 
     //
     //! The CRC of the parameter block.  When in RAM, this value is not used.
     //! When in flash, this value is used to validate the contents of the
     //! parameter block (to avoid using a partially written parameter block).
     //
-    unsigned char ucCRC;
+//    unsigned char ucCRC;
 
     //
     //! The version of this parameter block.  This can be used to distinguish
@@ -142,7 +142,10 @@ typedef struct
     //
     unsigned short usIrrigationLevel;
 
-    //
+
+   //     The cut type
+       unsigned short usCutType;
+
     //! The rate of acceleration, specified in milliwatts per second.
     //
     unsigned short usAccelPower;
@@ -308,6 +311,8 @@ typedef struct
     //! The I coefficient of the power adjust PID controller.
     //
     long lPAdjI;
+
+
 
 }
 tDriveParameters;

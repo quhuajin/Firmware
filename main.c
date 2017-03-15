@@ -1,4 +1,3 @@
-//*****************************************************************************
 //
 // main.c - Brushless DC motor drive main application.
 //
@@ -3144,10 +3143,10 @@ main(void)
     //
     // Initialize the Watchdog timer for a 100ms timeout.
     //
-    IntEnable(INT_WATCHDOG);
-    WatchdogReloadSet(WATCHDOG0_BASE, WATCHDOG_RELOAD_VALUE);
+   IntEnable(INT_WATCHDOG);
+   WatchdogReloadSet(WATCHDOG0_BASE, WATCHDOG_RELOAD_VALUE);
     WatchdogResetEnable(WATCHDOG0_BASE);
-    WatchdogEnable(WATCHDOG0_BASE);
+   WatchdogEnable(WATCHDOG0_BASE);
 
     //
     // Configure Timer 0 as a one-shot timer to be used for commutating the

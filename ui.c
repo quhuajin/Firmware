@@ -237,6 +237,9 @@ static const unsigned char g_pucLEDPin[2] =
 //*****************************************************************************
 static unsigned char g_ucControlType = 0;
 
+
+//static unsigned short g_ucCutType = 0;
+
 //*****************************************************************************
 //
 //! The specification of the type of sensor presence on the motor.  This
@@ -395,15 +398,15 @@ volatile unsigned char g_ucIntegralGainChanged = 0x00;
 tDriveParameters g_sParameters =
 {
     //
-    // The sequence number (ucSequenceNum); this value is not important for
-    // the copy in SRAM.
-    //
-    0,
-
-    //
-    // The CRC (ucCRC); this value is not important for the copy in SRAM.
-    //
-    0,
+//    // The sequence number (ucSequenceNum); this value is not important for
+//    // the copy in SRAM.
+//    //
+//    0,
+//
+//    //
+//    // The CRC (ucCRC); this value is not important for the copy in SRAM.
+//    //
+//    0,
 
     //
     // The parameter block version number (ucVersion).
@@ -481,6 +484,10 @@ tDriveParameters g_sParameters =
     // The irrigation level (usIrrigationLevel).
     //
     255,
+
+//
+	//The cutting type
+	0,
 
     //
     // The power acceleration (usAccelPower).
@@ -973,6 +980,18 @@ const tUIParameter g_sUIParameters[] =
         UISetIrrigationLevel
     },
 
+
+	//The cutting type (0 for handpiece, 1 for footpedal)
+
+	 {
+	        PARAM_CUT_TYPE,
+	        1,
+	        0,
+	        1,
+	        1,
+	        (unsigned char *)&(g_sParameters.usCutType),
+	        0
+	    },
     //
     // The minimum allowable drive current during operation.  This is specified
     // in milli-amperes, ranging from 0 to 10A.
@@ -1829,6 +1848,7 @@ static unsigned long g_ulUITickCount = 0;
 char rxData[64];
 unsigned short g_ulRxDataInt[7];
 static int g_ucSpeedThrottle = 0;
+static int g_triggerInfo=0;
 static int g_ucTIndexPrev = 0;
 unsigned long g_ucInitHallReading[6];
 unsigned int g_ucHallMin[UI_NUM_HALLS];
@@ -2454,6 +2474,7 @@ UIParamLoad(void)
     // values in the parameter block values.
     //
     g_ucControlType = g_sParameters.ucControlType;
+    //g_ucCutType= g_sParameters.usCutType;
     g_ucModulationType = g_sParameters.ucModulationType;
     g_ucDirection = HWREGBITH(&(g_sParameters.usFlags), FLAG_DIR_BIT);
     g_ucFrequency = g_sParameters.usFlags & FLAG_PWM_FREQUENCY_MASK;
@@ -3450,6 +3471,16 @@ int getThrottleSpeed(unsigned long *initHallReading)
 		// make sure the speed is not exceeding the maximum
 		if(tSpeedThrottle> UI_NUM_SPEED) tSpeedThrottle = UI_NUM_SPEED;
 
+		g_triggerInfo=tSpeedThrottle;
+
+		// for footpedal cutting type
+		if(g_sParameters.usCutType==1)
+			{
+
+			tSpeedThrottle = UI_NUM_SPEED;
+
+			}
+
 		//check if hall signal is skipped
 		hallSpacing = g_ucTIndexPrev - tIndex;
 
@@ -3532,13 +3563,16 @@ int getInitHallReading()
 	    }
 	}
 	
+
+	if (g_sParameters.usCutType==0 )
+	{
 	//add a check to insure the trigger is fully released to start
     if(tempIndex != 0)
     {
     	MainSetFault(FAULT_HALL_INIT);
     	return -1;
     }
-	
+	}
 	//check range		
 	g_ucInitHallReading[0] = tempMin;
 	g_ucInitHallReading[1] = tempMax;
@@ -3617,6 +3651,8 @@ void UICheckAndSetSpeed(void)
     
     // get speed
     g_ucSpeedThrottle = getThrottleSpeed(g_ucInitHallReading);
+
+
 
     // set speed 
     if(g_ucSpeedThrottle ==0)
@@ -3804,11 +3840,11 @@ void UICheckAndSetSpeed(void)
         MainSetFault(FAULT_CURRENT_HIGH_HW);
 
     //update the trigger information status
-    if(g_ucSpeedThrottle == UI_NUM_SPEED)
+    if(g_triggerInfo == UI_NUM_SPEED)
     {
     	GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_1, 0);
     }
-    else if(g_ucSpeedThrottle == 0)
+    else if(g_triggerInfo == 0)
     {
     	GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_1, GPIO_PIN_1);
     }
