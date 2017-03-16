@@ -656,6 +656,8 @@
 //*****************************************************************************
 #define PARAM_MIN_CURRENT       0x16
 
+#define PARAM_CUT_TYPE  0x56
+
 //*****************************************************************************
 //
 //! Specifies the maximum current supplied to the motor when operating.  If
