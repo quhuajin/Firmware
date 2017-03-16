@@ -29,9 +29,7 @@ ORDERED_OBJS += \
 "../lib/driverlib.lib" \
 "../lib/lwip-1.3.2.lib" \
 $(GEN_CMDS__FLAG) \
--l"rtsv7M3_T_le_eabi.lib" \
--l"C:/Users/hqu/Desktop/Firmware/lib/lwip-1.3.2.lib" \
--l"C:/Users/hqu/Desktop/Firmware/lib/driverlib.lib" \
+-l"libc.a" \
 
 -include ../makefile.init
 
@@ -139,47 +137,45 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-mCutter.out \
+Firmware.out \
 
 EXE_OUTPUTS__QUOTED += \
-"mCutter.out" \
+"Firmware.out" \
+
+BIN_OUTPUTS += \
+Firmware.hex \
+
+BIN_OUTPUTS__QUOTED += \
+"Firmware.hex" \
 
 
 # All Target
-all:
-	@$(MAKE) --no-print-directory pre-build
-	@$(MAKE) --no-print-directory main-build
-
-# Main-build Target
-main-build: mCutter.out
+all: Firmware.out
 
 # Tool invocations
-mCutter.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
+Firmware.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: TMS470 Linker'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.2/bin/armcl" -mv7M3 -g -O0 --gcc --define=ccs --define=PART_LM3S9B96 --diag_warning=225 -me --gen_func_subsections --abi=eabi --code_state=16 --ual -z -m"enet_lwip_ccs.map" --stack_size=2024 --heap_size=2024 --warn_sections -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.2/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.2/include" --reread_libs --xml_link_info="mCutter_linkInfo.xml" --rom_model -o "mCutter.out" $(ORDERED_OBJS)
+	@echo 'Invoking: ARM Linker'
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.2/bin/armcl" -mv4 --code_state=32 --abi=ti_arm9_abi -g --display_error_number --diag_warning=225 --diag_wrap=off -z -m"Firmware.map" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.2/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.2/include" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="Firmware_linkInfo.xml" --rom_model -o "Firmware.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
-	@$(MAKE) --no-print-directory post-build
+
+Firmware.hex: $(EXE_OUTPUTS)
+	@echo 'Invoking: ARM Hex Utility'
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.2/bin/armhex"  -o "Firmware.hex" $(EXE_OUTPUTS__QUOTED)
+	@echo 'Finished building: $@'
+	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(EXE_OUTPUTS__QUOTED)
+	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
 	-$(RM) "adc_ctrl.pp" "brake.pp" "hall_ctrl.pp" "irrigation.pp" "main.pp" "pwm_ctrl.pp" "startup_ccs.pp" "trapmod.pp" "ui.pp" "ui_ethernet.pp" "ui_onboard.pp" "ui_spi.pp" "ui_uart.pp" "utils\cpu_usage.pp" "utils\flash_pb.pp" "utils\lwiplib.pp" "utils\sine.pp" 
 	-$(RM) "adc_ctrl.obj" "brake.obj" "hall_ctrl.obj" "irrigation.obj" "main.obj" "pwm_ctrl.obj" "startup_ccs.obj" "trapmod.obj" "ui.obj" "ui_ethernet.obj" "ui_onboard.obj" "ui_spi.obj" "ui_uart.obj" "utils\cpu_usage.obj" "utils\flash_pb.obj" "utils\lwiplib.obj" "utils\sine.obj" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
-pre-build:
-	-C:/Users/hqu/Desktop/Firmware/get_version.bat  C:/Users/hqu/Desktop/Firmware >C:/Users/hqu/Desktop/Firmware/version.h
-	-@echo ' '
-
-post-build:
-	-"C:/ti/ccsv6/utils/tiobj2bin/tiobj2bin.bat" "mCutter.out" "mCutter.bin" "C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.2/bin/ofd470.exe" "C:/ti/ccsv6/tools/compiler/ti-cgt-arm_5.2.2/bin/hex470.exe" "C:/ti/ccsv6/utils/tiobj2bin/mkhex4bin.exe"
-	-@echo ' '
-
 .PHONY: all clean dependents
-.SECONDARY: main-build pre-build post-build
+.SECONDARY:
 
 -include ../makefile.targets
 
